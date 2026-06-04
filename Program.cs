@@ -2,12 +2,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular", policy =>
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyMethod()
-              .AllowAnyHeader());
+    options.AddPolicy("AllowAll", policy =>
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "https://mon-projet-angular-examen.web.app"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
 });
 var app = builder.Build();
-app.UseCors("AllowAngular");
+app.UseCors("AllowAll");
 app.MapControllers();
 app.Run();
