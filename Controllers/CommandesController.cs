@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
 namespace SimpleAPI.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
 public class CommandesController : ControllerBase
@@ -31,6 +29,7 @@ public class CommandesController : ControllerBase
     {
         commande.Id = _nextId++;
         commande.Date = DateTime.Now;
+        commande.Statut = "en_attente";
         _commandes.Add(commande);
         return Ok(commande);
     }
@@ -40,8 +39,13 @@ public class CommandesController : ControllerBase
     {
         var existing = _commandes.FirstOrDefault(c => c.Id == id);
         if (existing == null) return NotFound();
-        existing.Total = commande.Total;
-        existing.ClientId = commande.ClientId;
+        existing.Produit = commande.Produit;
+        existing.Quantite = commande.Quantite;
+        existing.PrixTotal = commande.PrixTotal;
+        existing.Statut = commande.Statut;
+        existing.ClientNom = commande.ClientNom;
+        existing.ClientEmail = commande.ClientEmail;
+        existing.ClientTelephone = commande.ClientTelephone;
         return Ok(existing);
     }
 
@@ -59,6 +63,12 @@ public class Commande
 {
     public int Id { get; set; }
     public DateTime Date { get; set; }
-    public decimal Total { get; set; }
+    public string Produit { get; set; } = "";
+    public int Quantite { get; set; }
+    public decimal PrixTotal { get; set; }
     public int ClientId { get; set; }
+    public string ClientNom { get; set; } = "";
+    public string ClientEmail { get; set; } = "";
+    public string ClientTelephone { get; set; } = "";
+    public string Statut { get; set; } = "en_attente";
 }
