@@ -1,45 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
-
 namespace SimpleAPI.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
 public class CommandesController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    public CommandesController(AppDbContext db) { _db = db; }
-
+    private static List<Commande> _commandes = new();
+    private static int _nextId = 1;
     [HttpGet]
-    public IActionResult GetAll() => Ok(_db.Commandes.ToList());
-
+    public IActionResult GetAll() => Ok(_commandes);
     [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
-        var commande = _db.Commandes.FirstOrDefault(c => c.Id == id);
+        var commande = _commandes.FirstOrDefault(c => c.Id == id);
         return commande == null ? NotFound() : Ok(commande);
     }
-
     [HttpGet("byClient/{clientId}")]
     public IActionResult GetByClientId(int clientId)
     {
-        var commandes = _db.Commandes.Where(c => c.ClientId == clientId).ToList();
+        var commandes = _commandes.Where(c => c.ClientId == clientId).ToList();
         return Ok(commandes);
     }
-
     [HttpPost]
     public IActionResult Create(Commande commande)
     {
+        commande.Id = _nextId++;
         commande.Date = DateTime.Now;
         commande.Statut = "en_attente";
-        _db.Commandes.Add(commande);
-        _db.SaveChanges();
+        _commandes.Add(commande);
         return Ok(commande);
     }
-
     [HttpPut("{id}")]
     public IActionResult Update(int id, Commande commande)
     {
-        var existing = _db.Commandes.FirstOrDefault(c => c.Id == id);
+        var existing = _commandes.FirstOrDefault(c => c.Id == id);
         if (existing == null) return NotFound();
         existing.Produit = commande.Produit;
         existing.Quantite = commande.Quantite;
@@ -48,17 +41,27 @@ public class CommandesController : ControllerBase
         existing.ClientNom = commande.ClientNom;
         existing.ClientEmail = commande.ClientEmail;
         existing.ClientTelephone = commande.ClientTelephone;
-        _db.SaveChanges();
         return Ok(existing);
     }
-
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        var commande = _db.Commandes.FirstOrDefault(c => c.Id == id);
+        var commande = _commandes.FirstOrDefault(c => c.Id == id);
         if (commande == null) return NotFound();
-        _db.Commandes.Remove(commande);
-        _db.SaveChanges();
+        _commandes.Remove(commande);
         return NoContent();
     }
+}
+public class Commande
+{
+    public int Id { get; set; }
+    public DateTime Date { get; set; }
+    public string Produit { get; set; } = "";
+    public int Quantite { get; set; }
+    public decimal PrixTotal { get; set; }
+    public int ClientId { get; set; }
+    public string ClientNom { get; set; } = "";
+    public string ClientEmail { get; set; } = "";
+    public string ClientTelephone { get; set; } = "";
+    public string Statut { get; set; } = "en_attente";
 }
